@@ -12,6 +12,8 @@ Mirrors `tests/example_validation_tests.rs` in ncmlabs/forge, using the CLI:
   * `run = "mock"`      -> `FORGE_MOCK=1 forge run <file>` per path, 120s timeout,
                            refused when the case has errors or warnings
   * `run = "live_only"` -> skipped (needs external agents, providers, credentials)
+  * `pending = "issue"` -> blocked upstream (e.g. a CLI gap): reported as PENDING,
+                           nothing is run and it does not fail the run
 
 The FORGE binary is taken from the `FORGE` environment variable.
 
@@ -102,10 +104,17 @@ def main() -> int:
     forge = forge_binary()
     cases = tomllib.loads(MANIFEST.read_text())["cases"]
     failures = 0
+    pending = 0
+    skipped = 0
 
     for case in cases:
         name = case["name"]
+        if case.get("pending"):
+            pending += 1
+            print(f"PENDING  {name} ({case['pending']})")
+            continue
         if case.get("run") == "live_only":
+            skipped += 1
             print(f"SKIP  {name} (live_only)")
             continue
 
@@ -121,7 +130,11 @@ def main() -> int:
         print(f"{'PASS' if passed else 'FAIL'}  {name} - {detail}")
 
     total = len(cases)
-    print(f"\n{total - failures}/{total} cases passed ({failures} failed)")
+    ok = total - failures - pending
+    print(
+        f"\n{ok}/{total} cases ok ({ok - skipped} passed, {pending} pending, "
+        f"{skipped} skipped, {failures} failed)"
+    )
     return 1 if failures else 0
 
 

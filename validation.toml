@@ -23,12 +23,14 @@ name = "slack responder agent"
 paths = ["agents/slack-responder/main.forge"]
 check = "ok"
 manifest = "agents/slack-responder/forge.project.toml"
+pending = "ncmlabs/forge#495"
 
 [[cases]]
 name = "inbound triager agent"
 paths = ["agents/inbound-triager/main.forge"]
 check = "ok"
 manifest = "agents/inbound-triager/forge.project.toml"
+pending = "ncmlabs/forge#495"
 
 [[cases]]
 name = "approval gate agent"
@@ -44,6 +46,7 @@ name = "PR review bot"
 paths = ["agents/pr-review-bot/server.forge"]
 check = "ok"
 manifest = "agents/pr-review-bot/forge.project.toml"
+pending = "ncmlabs/forge#495"
 
 [[cases]]
 name = "Slack adapter agent (+ smoke harness)"
@@ -55,12 +58,14 @@ paths = [
 check = "ok"
 merge = true
 manifest = "agents/slack-adapter/forge.project.toml"
+pending = "ncmlabs/forge#495"
 
 [[cases]]
 name = "clone-dev walking skeleton"
 paths = ["agents/clone-dev-skeleton/main.forge"]
 check = "ok"
 manifest = "agents/clone-dev-skeleton/forge.project.toml"
+pending = "ncmlabs/forge#495"
 
 [[cases]]
 name = "mastermind-pattern reference example (T1.2)"
@@ -73,6 +78,7 @@ name = "PR history miner agent"
 paths = ["agents/pr-history-miner/main.forge"]
 check = "ok"
 manifest = "agents/pr-history-miner/forge.project.toml"
+pending = "ncmlabs/forge#495"
 
 [[cases]]
 name = "dev-cycle lesson smoke test (T5.1)"
@@ -155,6 +161,7 @@ paths = [
 check = "ok"
 merge = true
 config = "sentinel/forge.config.toml"
+pending = "ncmlabs/forge#495"
 
 [[cases]]
 name = "basic server example"
@@ -191,6 +198,7 @@ name = "local skill project example"
 paths = ["skill_project/main.forge"]
 check = "ok"
 manifest = "skill_project/forge.project.toml"
+pending = "ncmlabs/forge#495"
 
 [[cases]]
 name = "github skill example"

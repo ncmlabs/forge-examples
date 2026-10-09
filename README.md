@@ -34,7 +34,7 @@ Some showcases need `v0.2.x` (see the note below), so bumps are not automatic.
 | `server/` | Smallest HTTP server: one `endpoint` backed by a task. |
 | `session/` | Session intrinsics: status, hooks, isolate (git-worktree sandbox), placeholder lifecycle, verification contracts and contradiction detection, plus live Claude/Codex engine variants. |
 | `skill_project/` | Project-level skill declarations in `forge.project.toml`. |
-| `skills/` | The GitHub skill driving `gh` CLI operations. |
+| `skills/` | Skill trees used by the examples (`slack`, `github`, `ollama`) plus a GitHub-skill demo driving `gh` CLI operations. |
 | `tictactoe/` | Multi-agent tic-tac-toe game system (platform, room agent, AI opponent, matchmaking). |
 | `wiki/` | A documentation wiki built entirely in FORGE: browse, confidence-gated search, LLM answers and generated reference docs. |
 
@@ -77,12 +77,13 @@ the remaining folders can follow newer releases.
 
 ## Known limitations
 
-Skill-backed examples — `agents/slack-responder`, `agents/inbound-triager`,
+The `slack`, `github` and `ollama` skill trees live in `skills/`, and the
+manifests and configs that reference them were rewritten to resolve in this
+layout. `forge check` has no `--manifest`/`--config` flag yet, so the pinned CLI
+cannot register those capabilities — tracked as
+[ncmlabs/forge#495](https://github.com/ncmlabs/forge/issues/495). The eight
+affected cases (`agents/slack-responder`, `agents/inbound-triager`,
 `agents/pr-review-bot`, `agents/slack-adapter`, `agents/clone-dev-skeleton`,
-`agents/pr-history-miner`, `sentinel/`, `skill_project/` and `skills/` — declare
-skill trees that live in the core repo (paths such as `../../../skills/slack`),
-and `sentinel/forge.config.toml` still points `skill_dirs` at
-`examples/sentinel/skills`. The skill trees were not part of this import, and
-`forge check` has no `--manifest`/`--config` flag in v0.2.0, so the CLI cannot
-register those capabilities; `scripts/validate.py` reports those cases as
-failures until the skills land here and the CLI can load them.
+`agents/pr-history-miner`, `sentinel/`, `skill_project/`) carry
+`pending = "ncmlabs/forge#495"` in `validation.toml`, are reported as `PENDING`
+and are not counted as failures; drop the marker once the flag lands.
