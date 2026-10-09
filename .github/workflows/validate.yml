@@ -1,0 +1,26 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Pinned FORGE release used to validate the examples. Bump this in one place.
+env:
+  FORGE_VERSION: v0.2.0
+
+jobs:
+  examples:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FORGE ${{ env.FORGE_VERSION }}
+        run: |
+          curl -sSL -o forge.tar.gz \
+            "https://github.com/ncmlabs/forge/releases/download/${FORGE_VERSION}/forge-x86_64-unknown-linux-gnu.tar.gz"
+          tar xzf forge.tar.gz
+          ./forge --version
+      - name: Validate examples
+        run: FORGE=./forge python3 scripts/validate.py
