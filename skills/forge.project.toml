@@ -7,4 +7,4 @@ description = "Demonstrates the GitHub skill for gh CLI operations"
 entry = "github_ops.forge"
 
 [skills]
-github = { path = "../../skills/github" }
+github = { path = "../skills/github" }

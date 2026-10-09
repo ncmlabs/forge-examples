@@ -7,4 +7,4 @@ description = "Mines historical PR reviews into a knowledge store for decision-c
 entry = "main.forge"
 
 [skills]
-github = { path = "../../../skills/github" }
+github = { path = "../../skills/github" }

@@ -7,5 +7,5 @@ description = "Inbound triage agent — classifies, routes, or escalates SlackMe
 entry = "main.forge"
 
 [skills]
-slack = { path = "../../../skills/slack" }
-github = { path = "../../../skills/github" }
+slack = { path = "../../skills/slack" }
+github = { path = "../../skills/github" }

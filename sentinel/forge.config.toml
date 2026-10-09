@@ -14,10 +14,10 @@ host = "127.0.0.1"
 port = 3001
 
 [server.static]
-root = "examples/sentinel/static"
+root = "sentinel/static"
 prefix = "/static"
 
 [skills]
-skill_dirs = ["examples/sentinel/skills"]
+skill_dirs = ["sentinel/skills"]
 timeout_secs = 60
 max_turns = 5

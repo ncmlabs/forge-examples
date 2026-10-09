@@ -7,5 +7,5 @@ description = "Autonomous Slack @mention responder using Slack + Ollama skills"
 entry = "main.forge"
 
 [skills]
-slack = { path = "../../../skills/slack" }
-ollama = { path = "../../../skills/ollama" }
+slack = { path = "../../skills/slack" }
+ollama = { path = "../../skills/ollama" }
