@@ -1,0 +1,235 @@
+# FORGE example validation manifest.
+#
+# `check = "ok"` means parser/resolver/checkers must produce no errors.
+# Warnings are allowed and remain visible in the test summary.
+# `check = "error"` means the example intentionally fails with the listed text.
+# `run = "mock"` means the example may execute in required CI with FORGE_MOCK=1.
+# `run = "live_only"` means runtime execution requires external agents, providers,
+# credentials, or side effects and is skipped by required CI.
+
+[[cases]]
+name = "agent examples"
+paths = [
+  "agents/debate.forge",
+  "agents/fact_check_pool.forge",
+  "agents/learning_agent.forge",
+  "agents/support_bot.forge",
+  "agents/toolkit_demo.forge",
+]
+check = "ok"
+
+[[cases]]
+name = "slack responder agent"
+paths = ["agents/slack-responder/main.forge"]
+check = "ok"
+manifest = "agents/slack-responder/forge.project.toml"
+pending = "ncmlabs/forge#495"
+
+[[cases]]
+name = "inbound triager agent"
+paths = ["agents/inbound-triager/main.forge"]
+check = "ok"
+manifest = "agents/inbound-triager/forge.project.toml"
+pending = "ncmlabs/forge#495"
+
+[[cases]]
+name = "approval gate agent"
+paths = [
+  "agents/approval-gate/main.forge",
+  "agents/approval-gate/server.forge",
+]
+check = "ok"
+manifest = "agents/approval-gate/forge.project.toml"
+
+[[cases]]
+name = "PR review bot"
+paths = ["agents/pr-review-bot/server.forge"]
+check = "ok"
+manifest = "agents/pr-review-bot/forge.project.toml"
+pending = "ncmlabs/forge#495"
+
+[[cases]]
+name = "Slack adapter agent (+ smoke harness)"
+paths = [
+  "agents/slack-adapter/main.forge",
+  "agents/slack-adapter/agents.forge",
+  "agents/slack-adapter/smoke.forge",
+]
+check = "ok"
+merge = true
+manifest = "agents/slack-adapter/forge.project.toml"
+pending = "ncmlabs/forge#495"
+
+[[cases]]
+name = "clone-dev walking skeleton"
+paths = ["agents/clone-dev-skeleton/main.forge"]
+check = "ok"
+manifest = "agents/clone-dev-skeleton/forge.project.toml"
+pending = "ncmlabs/forge#495"
+
+[[cases]]
+name = "mastermind-pattern reference example (T1.2)"
+paths = ["agents/mastermind-pattern/main.forge"]
+check = "ok"
+manifest = "agents/mastermind-pattern/forge.project.toml"
+
+[[cases]]
+name = "PR history miner agent"
+paths = ["agents/pr-history-miner/main.forge"]
+check = "ok"
+manifest = "agents/pr-history-miner/forge.project.toml"
+pending = "ncmlabs/forge#495"
+
+[[cases]]
+name = "dev-cycle lesson smoke test (T5.1)"
+paths = ["agents/dev-cycle-lesson-smoke/main.forge"]
+check = "ok"
+manifest = "agents/dev-cycle-lesson-smoke/forge.project.toml"
+
+[[cases]]
+name = "dev-cycle mastery smoke test (T5.2)"
+paths = ["agents/dev-cycle-mastery-smoke/main.forge"]
+check = "ok"
+manifest = "agents/dev-cycle-mastery-smoke/forge.project.toml"
+
+[[cases]]
+name = "mastery-cadence-smoke (T5 scheduler MVP, #332)"
+paths = ["agents/mastery-cadence-smoke/main.forge"]
+check = "ok"
+manifest = "agents/mastery-cadence-smoke/forge.project.toml"
+
+[[cases]]
+name = "wake-rehydration-smoke (#333)"
+paths = ["agents/wake-rehydration-smoke/main.forge"]
+check = "ok"
+manifest = "agents/wake-rehydration-smoke/forge.project.toml"
+
+[[cases]]
+name = "mock-runnable quiz tutor agent"
+paths = ["agents/quiz_tutor.forge"]
+check = "ok"
+run = "mock"
+
+[[cases]]
+name = "cross-project bridge webhook demo (#335)"
+paths = ["agents/cross-project-bridge/main.forge"]
+check = "ok"
+
+[[cases]]
+name = "command examples"
+paths = [
+  "command/command_argv.forge",
+  "command/command_background.forge",
+  "command/command_background_cancel.forge",
+  "command/command_env.forge",
+  "command/command_fail.forge",
+  "command/command_stderr.forge",
+  "command/command_success.forge",
+  "command/command_timeout.forge",
+  "command/command_workdir.forge",
+  "command/exec_compose.forge",
+  "command/exec_fail.forge",
+  "command/exec_multi.forge",
+  "command/skill_finder.forge",
+]
+check = "ok"
+
+[[cases]]
+name = "mock-runnable exec examples"
+paths = [
+  "command/exec_success.forge",
+  "command/exec_when_dispatch.forge",
+  "command/skill_bot.forge",
+]
+check = "ok"
+run = "mock"
+
+[[cases]]
+name = "observer web example"
+paths = [
+  "observer/server.forge",
+  "observer/shared.forge",
+]
+check = "ok"
+
+[[cases]]
+name = "sentinel web example"
+paths = [
+  "sentinel/server.forge",
+  "sentinel/shared.forge",
+]
+check = "ok"
+merge = true
+config = "sentinel/forge.config.toml"
+pending = "ncmlabs/forge#495"
+
+[[cases]]
+name = "basic server example"
+paths = ["server/hello_server.forge"]
+check = "ok"
+
+[[cases]]
+name = "session examples"
+paths = [
+  "session/session_contradiction.forge",
+  "session/session_hooks.forge",
+  "session/session_isolate.forge",
+  "session/session_placeholder.forge",
+  "session/session_status.forge",
+  "session/session_verification.forge",
+]
+check = "ok"
+
+[[cases]]
+name = "live session examples"
+paths = [
+  "session/session_claude_e2e.forge",
+  "session/session_claude_knowledge_live.forge",
+  "session/session_contradiction_live.forge",
+  "session/session_engine_codex_live.forge",
+  "session/session_engine_live.forge",
+  "session/session_verification_live.forge",
+]
+check = "ok"
+run = "live_only"
+
+[[cases]]
+name = "local skill project example"
+paths = ["skill_project/main.forge"]
+check = "ok"
+manifest = "skill_project/forge.project.toml"
+pending = "ncmlabs/forge#495"
+
+[[cases]]
+name = "github skill example"
+paths = ["skills/github_ops.forge"]
+check = "ok"
+run = "live_only"
+manifest = "skills/forge.project.toml"
+
+[[cases]]
+name = "tic-tac-toe multi-file example"
+paths = [
+  "tictactoe/platform.forge",
+  "tictactoe/room_agent.forge",
+  "tictactoe/ai_opponent.forge",
+  "tictactoe/matchmaking.forge",
+]
+check = "ok"
+merge = true
+manifest = "tictactoe/forge.project.toml"
+
+[[cases]]
+name = "wiki multi-file example"
+paths = [
+  "wiki/server.forge",
+  "wiki/shared.forge",
+]
+check = "ok"
+merge = true
+config = "wiki/forge.config.toml"
+
+[[cases]]
+name = "wiki client boundary example"
+paths = ["wiki/client.forge"]
+check = "ok"
