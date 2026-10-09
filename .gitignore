@@ -1,0 +1,5 @@
+# Local tooling cache (pinned FORGE binaries for validation).
+.cache/
+
+# FORGE runtime state written by examples.
+.forge-data/
