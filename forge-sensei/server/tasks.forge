@@ -1,0 +1,141 @@
+#! boundary: server
+
+use
+  llm.reason
+  llm.classify
+  data.store
+  data.get
+  text.to_number
+
+pure compute_mastery_score
+  needs passed: Number, total: Number
+  gives Number
+  do
+    if total == 0
+      give 0
+    give (passed / total) * 100
+
+pure determine_level
+  needs score: Number
+  gives Text
+  do
+    if score >= 90
+      give "expert"
+    if score >= 70
+      give "journeyman"
+    if score >= 40
+      give "apprentice"
+    give "novice"
+
+pure format_status
+  needs level: Text, score: Number, interactions: Number
+  gives Text
+  do
+    give "forge-sensei | Level: {level} | Mastery: {score}% | Interactions: {interactions}"
+
+pure number_to_text
+  needs n: Number
+  gives Text
+  do
+    give "{n}"
+
+pure check_prediction
+  needs predicted: Text, expected: Text
+  gives Bool
+  do
+    if predicted.contains(expected)
+      give true
+    give false
+
+task answer_forge_question
+  needs question: Text, context: Text
+  gives Text
+  do
+    result = reason "You are forge-sensei, an expert on the FORGE programming language for oracle-augmented computation. Using this prior knowledge:\n{context}\n\nAnswer this FORGE question accurately and concisely: {question}\n\nIf the prior knowledge does not cover this topic, say so honestly."
+    when result.sure -> give result
+    when result.unsure -> give "Uncertain: {result}"
+    else -> give "I could not answer this question confidently. Consider checking the forge-reference."
+
+task review_forge_code
+  needs code: Text, context: Text
+  gives Text
+  do
+    result = reason "You are forge-sensei, reviewing FORGE code for correctness. Using this knowledge of FORGE:\n{context}\n\nReview this FORGE code for errors, style issues, and principle violations:\n{code}\n\nList each issue with: line reference, issue description, fix suggestion."
+    when result.sure -> give result
+    when result.unsure -> give "Uncertain review: {result}"
+    else -> give "Could not review this code confidently."
+
+task extract_lesson
+  needs question: Text, resolution: Text
+  gives Text
+  do
+    result = reason "A FORGE developer asked: {question}\nThe resolution was: {resolution}\n\nExtract a concise, reusable lesson about FORGE from this interaction. Format: [CATEGORY] lesson text. Categories: SYNTAX, TASKS, FLOWS, CONTROL, AGENTS, KNOWLEDGE, SUPERVISION, PRINCIPLES, PATTERNS, ERRORS."
+    when result.sure -> give result
+    when result.unsure -> give "Tentative lesson: {result}"
+    else -> give "Could not extract lesson."
+
+task predict_outcome
+  needs test_input: Text, knowledge_context: Text
+  gives Text
+  do
+    result = reason "Given this FORGE program:\n{test_input}\n\nUsing your knowledge:\n{knowledge_context}\n\nPredict the EXACT compiler outcome: parse_ok, parse_error, compile_ok, compile_error, run_ok, or run_error. State your prediction and explain briefly."
+    when result.sure -> give result
+    when result.unsure -> give "UNCERTAIN: {result}"
+    else -> give "CANNOT_PREDICT"
+
+task categorize_for_recall
+  needs context: Text
+  gives Text
+  do
+    result = classify context into ["SYNTAX", "TASKS", "FLOWS", "CONTROL", "AGENTS", "KNOWLEDGE", "SUPERVISION", "PRINCIPLES", "PATTERNS", "ERRORS", "CONFORMANCE", "BOUNDARY"]
+    when result.sure -> give result
+    when result.unsure -> give result
+    else -> give "GENERAL"
+
+# #496: `batch_assess` called `assess_detailed`, which is an event handler and
+# therefore not callable. The assessment body lives here so the handler and the
+# batch loop share one implementation.
+task run_assessment
+  needs test_input: Text, expected: Text
+  gives AssessmentResult or Text
+  do
+    categories = categorize_for_recall("{test_input} expects {expected}")
+    prior = recall "{categories} {test_input}"
+    when prior.sure -> give predict_outcome(test_input, prior)
+    when prior.unsure -> give predict_outcome(test_input, prior)
+    else -> give AssessmentResult(passed: false, prediction: "NO_KNOWLEDGE", expected: expected, gap_topic: categories)
+
+task get_mastery_score
+  gives Text
+  do
+    raw = data.get("sensei:score")
+    if raw == ""
+      give "0"
+    give raw
+
+task get_mastery_level
+  gives Text
+  do
+    raw = data.get("sensei:level")
+    if raw == ""
+      give "novice"
+    give raw
+
+task get_interaction_count
+  gives Text
+  do
+    raw = data.get("sensei:interactions")
+    if raw == ""
+      give "0"
+    give raw
+
+task increment_interactions
+  gives Text
+  do
+    raw = data.get("sensei:interactions")
+    if raw == ""
+      raw = "0"
+    current = text.to_number(raw)
+    next = current + 1
+    data.store("sensei:interactions", number_to_text(next))
+    give number_to_text(next)

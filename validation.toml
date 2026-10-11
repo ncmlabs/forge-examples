@@ -233,3 +233,33 @@ config = "wiki/forge.config.toml"
 name = "wiki client boundary example"
 paths = ["wiki/client.forge"]
 check = "ok"
+
+# ── forge-sensei (imported from ncmlabs/forge workflows/ at c8c3b1e, forge#485) ──
+# Imported verbatim; scripts still reference the old `workflows/forge-sensei` paths
+# and get refactored with the other examples after the v0.3 roadmap.
+
+[[cases]]
+name = "forge-sensei single-file workflow"
+paths = ["forge-sensei/single-file.forge"]
+check = "ok"
+
+[[cases]]
+name = "forge-sensei multi-file workflow"
+paths = [
+  "forge-sensei/shared/types.forge",
+  "forge-sensei/shared/events.forge",
+  "forge-sensei/shared/states.forge",
+  "forge-sensei/server/tasks.forge",
+  "forge-sensei/server/flows.forge",
+  "forge-sensei/server/agent.forge",
+  "forge-sensei/server/web.forge",
+]
+check = "ok"
+manifest = "forge-sensei/forge.project.toml"
+merge = true
+
+[[cases]]
+name = "forge-sensei client workflow"
+paths = ["forge-sensei/client/client.forge"]
+check = "ok"
+manifest = "forge-sensei/client/forge.project.toml"

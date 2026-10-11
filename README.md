@@ -29,6 +29,7 @@ Some showcases need `v0.2.x` (see the note below), so bumps are not automatic.
 | --- | --- |
 | `agents/` | Agent showcases and smoke tests: debate/fact-check pool/support/toolkit agents, Slack responder and adapter, inbound triager, approval gate, PR review bot, clone-dev walking skeleton, mastermind pattern, PR history miner, dev-cycle and wake-rehydration smokes. |
 | `command/` | `command` and `exec` intrinsic acceptance examples: argv, env, workdir, timeouts, background+cancel, stderr, failures, plus exec and skill composition. |
+| `forge-sensei/` | FORGE language learning agent: server (agent, flows, web UI with `Html` templates and static assets), client, and its install/pretrain scripts. Imported from `ncmlabs/forge` `workflows/` at `c8c3b1e` (forge#485); scripts still use the old `workflows/forge-sensei` paths until the post-v0.3 refactor. |
 | `observer/` | "Standalone runtime inspector that connects to any running FORGE server" — wardens, confidence, token economy, stuck detection, knowledge stores. |
 | `sentinel/` | "AI-Powered Repo Health Dashboard" — FORGE monitoring FORGE, exercising exec, the skill bridge and `>>` composition. |
 | `server/` | Smallest HTTP server: one `endpoint` backed by a task. |
