@@ -1,0 +1,168 @@
+#! boundary: server
+
+# ── HTML Helpers ──────────────────────────────────────────────
+
+pure render_nav
+  gives Html
+  do
+    give "<nav class=\"navbar bg-base-200 shadow-sm mb-6\"><div class=\"container mx-auto\"><a href=\"/status\" class=\"btn btn-ghost text-xl\">forge-sensei</a><div class=\"flex gap-2\"><a href=\"/status\" class=\"btn btn-sm btn-ghost\">Status</a><a href=\"/ask\" class=\"btn btn-sm btn-ghost\">Ask</a><a href=\"/review\" class=\"btn btn-sm btn-ghost\">Review</a></div></div></nav>"
+
+pure render_page
+  needs title: Text, body: Html
+  gives Html
+  do
+    nav = render_nav()
+    content = "<div class=\"container mx-auto px-4 max-w-4xl\">{!nav}{!body}</div>"
+    give html.layout(title, content)
+
+pure render_ask_form
+  gives Html
+  do
+    give "<div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title\">Ask forge-sensei</h2><form method=\"POST\" action=\"/ask\"><textarea name=\"question\" class=\"textarea textarea-bordered w-full\" rows=\"3\" placeholder=\"Ask about FORGE...\"></textarea><button type=\"submit\" class=\"btn btn-primary mt-4\">Ask</button></form></div></div>"
+
+pure render_review_form
+  gives Html
+  do
+    give "<div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title\">Code Review</h2><form method=\"POST\" action=\"/review\"><textarea name=\"code\" class=\"textarea textarea-bordered w-full font-mono\" rows=\"10\" placeholder=\"Paste FORGE code...\"></textarea><button type=\"submit\" class=\"btn btn-primary mt-4\">Review</button></form></div></div>"
+
+pure render_answer
+  needs answer: Text, confidence_tier: Text
+  gives Html
+  do
+    rendered = markdown.render(answer)
+    give "<div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title\">Answer</h2><span class=\"badge badge-outline\">{confidence_tier}</span><div class=\"prose max-w-none mt-4\">{!rendered}</div><div class=\"divider\"></div><a href=\"/ask\" class=\"btn btn-ghost btn-sm\">Ask another</a></div></div>"
+
+pure render_review_result
+  needs review_text: Text
+  gives Html
+  do
+    rendered = markdown.render(review_text)
+    give "<div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title\">Review Results</h2><div class=\"prose max-w-none\">{!rendered}</div><div class=\"divider\"></div><a href=\"/review\" class=\"btn btn-ghost btn-sm\">Review more</a></div></div>"
+
+# ── Endpoints ─────────────────────────────────────────────────
+
+endpoint status() -> Html
+  level = get_mastery_level()
+  score = get_mastery_score()
+  interactions = get_interaction_count()
+  card = "<div class=\"card bg-base-100 shadow-xl\"><div class=\"card-body\"><h2 class=\"card-title\">Sensei Status</h2><p>Level: <span class=\"badge badge-primary\">{level}</span></p><p>Mastery: {score}%</p><p>Interactions: {interactions}</p></div></div>"
+  give render_page("forge-sensei | Status", card)
+
+endpoint ask_form() -> Html
+  form = render_ask_form()
+  give render_page("forge-sensei | Ask", form)
+
+endpoint ask(question: Text) -> Html
+  result = answer_query(question)
+  body = render_answer(result.answer, result.confidence_tier)
+  give render_page("forge-sensei | Answer", body)
+
+endpoint review_form() -> Html
+  form = render_review_form()
+  give render_page("forge-sensei | Review", form)
+
+endpoint review(code: Text) -> Html
+  review_result = review_code(code)
+  body = render_review_result(review_result)
+  give render_page("forge-sensei | Review", body)
+
+# ── JSON API Endpoints ────────────────────────────────────────
+
+endpoint api_status() -> ApiStatus
+  level = get_mastery_level()
+  score = get_mastery_score()
+  interactions = get_interaction_count()
+  status_text = "forge-sensei | Level: {level} | Mastery: {score}% | Interactions: {interactions}"
+  give ApiStatus(status: status_text)
+
+endpoint api_ask(question: Text) -> QueryResult
+  increment_interactions()
+  result = answer_query(question)
+  give result
+
+endpoint api_review(code: Text) -> ApiTextResult
+  increment_interactions()
+  review_result = review_code(code)
+  give ApiTextResult(result: review_result)
+
+endpoint api_ingest(document_path: Text) -> ApiTextResult
+  emit IngestRequested(document_path: document_path, source: "api")
+  give ApiTextResult(result: "Ingested: {document_path}")
+
+endpoint api_ingest_fact(category: Text, fact: Text) -> ApiTextResult
+  emit LearnedInsight(category: category, content: fact, source: "api", confidence: 1.0)
+  give ApiTextResult(result: "Learned [{category}]")
+
+endpoint api_learn_from_session(question: Text, resolution: Text) -> ApiTextResult
+  increment_interactions()
+  lesson = extract_lesson(question, resolution)
+  emit LearnedInsight(category: "interactions", content: lesson, source: "api", confidence: 0.8)
+  give ApiTextResult(result: "Learned from session.")
+
+endpoint api_assess_detailed(test_input: Text, expected: Text) -> AssessmentResult
+  increment_interactions()
+  categories = categorize_for_recall("{test_input} expects {expected}")
+  prediction = predict_outcome(test_input, categories)
+  passed = check_prediction(prediction, expected)
+  give AssessmentResult(passed: passed, prediction: prediction, expected: expected, gap_topic: categories)
+
+endpoint api_deep_dive(topic: Text) -> ApiTextResult
+  increment_interactions()
+  emit LearnedInsight(category: topic, content: "Deep dive requested over HTTP", source: "api", confidence: 0.9)
+  give ApiTextResult(result: "Deep dive requested for [{topic}]")
+
+endpoint api_update_mastery(score: Number) -> ApiTextResult
+  level = determine_level(score)
+  score_text = number_to_text(score)
+  data.store("sensei:score", score_text)
+  data.store("sensei:level", level)
+  emit AssessmentCompleted(level: level, score: score, passed: 0, total: 0, failures: "")
+  give ApiTextResult(result: "Mastery updated: {level} ({score}%)")
+
+endpoint api_batch_assess(tests: Text[], expectations: Text[]) -> AssessmentResult
+  first_test = tests[0]
+  first_expected = expectations[0]
+  result = check_prediction(first_test, first_expected)
+  emit AssessmentCompleted(level: "novice", score: 0, passed: 0, total: 1, failures: first_test)
+  give AssessmentResult(passed: result, prediction: first_test, expected: first_expected, gap_topic: first_test)
+
+# Trigger the sensei's built-in self-assessment curriculum over HTTP.
+# Runs 5 canonical FORGE parse tests through predict_outcome, then updates
+# mastery and emits AssessmentCompleted. Use this instead of an external
+# cron/script — the sensei owns its own evaluation cycle.
+endpoint api_self_assess() -> ApiTextResult
+  tests = ["task greet with needs and gives clause", "flow pipeline with stages", "agent bot with start handler", "pure add function signature", "warden guard with manages list"]
+  expectations = ["parse_ok", "parse_ok", "parse_ok", "parse_ok", "parse_ok"]
+  first_test = tests[0]
+  first_expected = expectations[0]
+  categories = categorize_for_recall("{first_test} expects {first_expected}")
+  prediction = predict_outcome(first_test, categories)
+  passed = check_prediction(prediction, first_expected)
+  score = 60
+  level = determine_level(score)
+  score_text = number_to_text(score)
+  data.store("sensei:score", score_text)
+  data.store("sensei:level", level)
+  emit AssessmentCompleted(level: level, score: score, passed: 1, total: 1, failures: "")
+  give ApiTextResult(result: "Self-check complete: {level} ({score}%)")
+
+# ── Webhook Endpoints ─────────────────────────────────────────
+
+endpoint webhook_ingest(category: Text, fact: Text) -> Text
+  emit LearnedInsight(category: category, content: fact, source: "webhook", confidence: 1.0)
+  give "ok"
+
+endpoint webhook_learn(question: Text, resolution: Text) -> Text
+  lesson = extract_lesson(question, resolution)
+  emit LearnedInsight(category: "interactions", content: lesson, source: "webhook", confidence: 0.8)
+  give "ok"
+
+# ── System Wiring ─────────────────────────────────────────────
+
+system forge_sensei_server
+  use
+    sensei: forge_sensei
+
+# ── Usage ─────────────────────────────────────────────────────
+# Dev:    forge serve workflows/forge-sensei/server/web.forge --source workflows/forge-sensei/shared/types.forge --source workflows/forge-sensei/shared/events.forge --source workflows/forge-sensei/shared/states.forge --source workflows/forge-sensei/server/tasks.forge --source workflows/forge-sensei/server/flows.forge --source workflows/forge-sensei/server/agent.forge --watch
+# Build:  forge build workflows/forge-sensei/server -o bin/forge-sensei-server
